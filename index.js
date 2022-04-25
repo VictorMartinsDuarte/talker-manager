@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const init = 'Iniciando o Projeto Talker Manager';
+
 const app = express();
 app.use(bodyParser.json());
 
