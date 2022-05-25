@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs').promises;
+const tokenGenerator = require('./utils/tokenGenerator');
 
 const router = express.Router();
 
@@ -30,6 +31,10 @@ router.get('/talker/:id', async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+router.post('/login', (_req, res) => {
+  res.status(200).json({ token: tokenGenerator() });
 });
 
 module.exports = router;
