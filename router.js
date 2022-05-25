@@ -14,7 +14,7 @@ router.get('/talker', async (_req, res, next) => {
   }
 });
 
-router.get('talker/:id', async (req, res, next) => {
+router.get('/talker/:id', async (req, res, next) => {
   try {
     const data = await fs.readFile(jsonData, 'utf-8');
     const tkList = JSON.parse(data);
