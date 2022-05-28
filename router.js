@@ -77,7 +77,7 @@ router.put('/talker/:id', reqAuth, bodyValidation, async (req, res, next) => {
   }
 });
 
-router.delete('/talker/:id', async (req, res, next) => {
+router.delete('/talker/:id', reqAuth, async (req, res, next) => {
   try {
     const data = await fs.readFile(jsonData, 'utf-8');
     const tkList = JSON.parse(data);
