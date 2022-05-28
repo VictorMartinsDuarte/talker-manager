@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const tokenGenerator = require('./utils/tokenGenerator');
 const emailValidation = require('./middlewares/emailValidation');
 const passwordValidation = require('./middlewares/passwordValidation');
-const reqAuthentication = require('./middlewares/reqAuth');
+const reqAuth = require('./middlewares/reqAuth');
 const bodyValidation = require('./middlewares/bodyValidation');
 
 const router = express.Router();
@@ -41,17 +41,37 @@ router.post('/login', emailValidation, passwordValidation, (_req, res) => {
   res.status(200).json({ token: tokenGenerator() });
 });
 
-router.post('/talker', reqAuthentication, bodyValidation, async (req, res, next) => {
+router.post('/talker', reqAuth, bodyValidation, async (req, res, next) => {
   try {
     const { name, age, talk } = req.body;
     const data = await fs.readFile(jsonData, 'utf-8');
-    const tklist = JSON.parse(data);
-    const id = tklist.length + 1;
+    const tkList = JSON.parse(data);
+    const id = tkList.length + 1;
     const talker = { id, name, age, talk };
-    tklist.push(talker);
+    tkList.push(talker);
     // Referência writeFile: https://www.geeksforgeeks.org/node-js-fs-writefile-method/
-    fs.writeFile(jsonData, JSON.stringify(tklist));
+    fs.writeFile(jsonData, JSON.stringify(tkList));
     res.status(201).json(talker);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put('/talker/:id', reqAuth, bodyValidation, async (req, res, next) => {
+  try {
+    const { name, age, talk } = req.body;
+    const data = await fs.readFile(jsonData, 'utf-8');
+    const tkList = JSON.parse(data);
+    const id = +req.params.id;
+    const tkIndex = tkList.indexOf((tk) => tk.id === Number(id));
+    const modifiedTk = { id, name, age, talk };
+    console.log(tkIndex);
+    tkList.splice((tkIndex - 1), 1, modifiedTk);
+    const newList = tkList;
+    console.log(newList);
+    await fs.writeFile(jsonData, JSON.stringify(newList));
+    res.status(200).json(modifiedTk);
+    // res.status(400).json({ message: 'Valores inválidos.' });
   } catch (error) {
     next(error);
   }
@@ -60,18 +80,18 @@ router.post('/talker', reqAuthentication, bodyValidation, async (req, res, next)
 router.delete('/talker/:id', async (req, res, next) => {
   try {
     const data = await fs.readFile(jsonData, 'utf-8');
-    const tklist = JSON.parse(data);
+    const tkList = JSON.parse(data);
     const { id } = req.params;
-    const tkIndex = tklist.indexOf((tk) => tk.id === id);
-    const newTklist = () => {
-      if (tkIndex >= 0) {
-        return tklist.splice(tkIndex, 1);
-      }
-      return res.status(400).send();
-    };
-    console.log(tkIndex);
+    const newTkList = tkList.filter((tk) => tk.id !== Number(id));
+    // const newTklist = () => {
+    //   if (tkIndex >= 0) {
+    //     return tklist.splice(tkIndex, 1);
+    //   }
+    //   return res.status(400).send();
+    // };
+    // console.log(tkIndex);
     // console.log(newTklist());
-    // fs.writeFile(jsonData, JSON.stringify(newTklist));
+    fs.writeFile(jsonData, JSON.stringify(newTkList));
     res.status(204).send();
   } catch (error) {
     next(error);

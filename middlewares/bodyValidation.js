@@ -13,6 +13,7 @@ const isFilled = (name, age, talk) => {
   if (!age) return { message: 'O campo "age" é obrigatório' };
   if (!watchedAt) return invalidTalkMessage;
   if (!rate) return invalidTalkMessage;
+  return invalidTalkMessage;
 };
 
 const rateValidation = (rate) => rate < 1 || rate > 5;
@@ -24,18 +25,31 @@ const talkValidation = (name, age, { watchedAt, rate }) => {
   return false;
 };
 
-const isTalkValid = (talk) => {
+// const isAllValid = (obj) => {
+//   if ((obj.talk in obj)) {
+//     // const { name, age, talk } = obj;
+//     // const { watchedAt, rate } = talk;
+//     return true;
+//   }
+//   // if (talk === undefined) return true;
+//   // if (!watchedAt || !rate) return true;
+//   return false;
+// };
+const isTalkValid = (obj) => {
+  const { talk } = obj;
+  // if (!(talk in obj)) return true;
   const { watchedAt, rate } = talk;
-  if (!talk) return true;
-  if (talk === undefined) return true;
-  if (!watchedAt || !rate) return true;
+  if (watchedAt && rateValidation(rate)) return false;
+  if (!watchedAt) return true;
+  if (!rate) return true;
+  return false;
 };
 
 const bodyValidation = (req, res, next) => {
   const { name, age, talk } = req.body;
   // const { watchedAt, rate } = talk;
   console.log(talk);
-  if (!name || !age || isTalkValid(talk)) {
+  if (!name || !age || isTalkValid(req.body)) {
     res.status(400).json(isFilled(name, age, talk));
   }
   if (talkValidation(name, age, talk)) res.status(400).json(talkValidation(name, age, talk));
