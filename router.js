@@ -19,6 +19,22 @@ router.get('/talker', async (_req, res, next) => {
   }
 });
 
+router.get('/talker/search', reqAuth, async (req, res, next) => {
+  try {
+    const data = await fs.readFile(jsonData, 'utf-8');
+    const tkList = JSON.parse(data);
+    // Referência req.query: https://pt.stackoverflow.com/questions/401582/a-diferen%C3%A7a-entre-req-params-e-req-query
+    const { q } = req.query;
+    const talkersFilter = tkList.filter(({ name }) => name.includes(q));
+    console.log(q);
+    console.log(talkersFilter);
+    if (!talkersFilter) res.status(200).json([]);
+    res.status(200).json(talkersFilter);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/talker/:id', async (req, res, next) => {
   try {
     const data = await fs.readFile(jsonData, 'utf-8');
@@ -83,14 +99,6 @@ router.delete('/talker/:id', reqAuth, async (req, res, next) => {
     const tkList = JSON.parse(data);
     const { id } = req.params;
     const newTkList = tkList.filter((tk) => tk.id !== Number(id));
-    // const newTklist = () => {
-    //   if (tkIndex >= 0) {
-    //     return tklist.splice(tkIndex, 1);
-    //   }
-    //   return res.status(400).send();
-    // };
-    // console.log(tkIndex);
-    // console.log(newTklist());
     fs.writeFile(jsonData, JSON.stringify(newTkList));
     res.status(204).send();
   } catch (error) {
